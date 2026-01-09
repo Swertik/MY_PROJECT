@@ -1,1 +1,34 @@
-<p>dashboard works!</p>
+<table>
+    <tr>
+        <th>
+            Имя ученика
+        </th>
+        <th>
+            Группа
+        </th>
+        <th>
+            Выполненные задания
+        </th>
+        <th>
+            Добавить задание
+        </th>
+    </tr>
+    <tr>
+        @for (item of data; track item.id) {
+            <td>
+                {{item.name}}
+            </td>
+            <td>
+                {{item.group}}
+            </td>
+            <td>
+                @for (task of item.completed_tasks; track $index){
+                    <span>{{task}}</span>
+                }
+            </td>
+            <td>
+                <button>+</button>
+            </td>
+        }
+    </tr>
+</table>

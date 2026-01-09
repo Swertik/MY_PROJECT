@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
-
+  data = [{id:1, name: "Имя", group: "Группа", completed_tasks: [1,2,3]}]
 }
