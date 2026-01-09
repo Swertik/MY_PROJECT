@@ -13,22 +13,24 @@
             Добавить задание
         </th>
     </tr>
-    <tr>
-        @for (item of data; track item.id) {
+    
+        @for (item of table_data(); track item.id) {
+        <tr>
             <td>
-                {{item.name}}
+                {{item.fio}}
             </td>
             <td>
-                {{item.group}}
+                {{item.groupName}}
             </td>
             <td>
-                @for (task of item.completed_tasks; track $index){
-                    <span>{{task}}</span>
+                @for (task of item.tasksHistory; track $index){
+                    <span>{{task.task_name}}</span>
                 }
             </td>
             <td>
                 <button>+</button>
             </td>
+        </tr>
         }
-    </tr>
+    
 </table>
