@@ -1,36 +1,81 @@
-<table>
-    <tr>
-        <th>
-            Имя ученика
-        </th>
-        <th>
-            Группа
-        </th>
-        <th>
-            Выполненные задания
-        </th>
-        <th>
-            Добавить задание
-        </th>
-    </tr>
-    
-        @for (item of table_data(); track item.id) {
-        <tr>
-            <td>
-                {{item.fio}}
-            </td>
-            <td>
-                {{item.groupName}}
-            </td>
-            <td>
-                @for (task of item.tasksHistory; track $index){
-                    <span>{{task.task_name}}</span>
-                }
-            </td>
-            <td>
-                <button>+</button>
-            </td>
-        </tr>
+<div class="dashboard-container">
+  
+  <div class="search-area">
+    <div class="chips-input-container">
+      
+      @for (chip of searchChips(); track $index) {
+        <div class="chip">
+          <span>{{ chip }}</span>
+          <button (click)="removeChip($index)" class="chip-remove">×</button>
+        </div>
+      }
+
+      <div class="input-wrapper" style="position: relative; flex-grow: 1;">
+        <input 
+          type="text" 
+          placeholder="Выберите группу..."
+          [(ngModel)]="currentInput"
+          (focus)="onInputFocus()"
+          (blur)="onInputBlur()"
+          class="input-no-border"
+        >
+
+        @if (isDropdownOpen() && dropdownOptions().length > 0) {
+          <ul class="dropdown-list">
+            @for (option of dropdownOptions(); track option) {
+              <li (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
+                {{ option }}
+              </li>
+            }
+          </ul>
         }
+      </div>
+
+    </div>
     
-</table>
+    <div class="hint">Найдено: {{ filteredData().length }}</div>
+  </div>
+
+  <div class="cards-grid">
+  
+  @for (student of filteredData(); track student.id) {
+    <div class="student-card">
+      
+      <div class="card-header">
+        <div class="avatar-placeholder">{{ student.fio[0] }}</div> <div class="student-info">
+          <h3>{{ student.fio }}</h3>
+          <span class="group-badge">{{ student.groupName }}</span>
+        </div>
+        <button class="more-btn">⋮</button>
+      </div>
+
+      <div class="progress-section">
+        <label>Сдано работ: {{ student.tasksHistory.length }}</label>
+        <div class="progress-bar">
+          <div class="fill" [style.width.%]="(student.tasksHistory.length / 10) * 100"></div>
+        </div>
+      </div>
+
+      <div class="recent-activity">
+        <h4>Последние события:</h4>
+        <ul>
+          @for (task of student.tasksHistory.slice(0, 3); track task.record_id) {
+            <li [class.completed]="task.is_completed">
+              <span class="status-dot"></span>
+              {{ task.task_name }}
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="card-actions">
+        <button mat-stroked-button>История</button>
+        <button mat-flat-button color="primary">+ Задание</button>
+      </div>
+
+    </div>
+  }
+
+</div>
+
+</div>
