@@ -12,18 +12,24 @@
 
       <div class="input-wrapper" style="position: relative; flex-grow: 1;">
         <input 
-          type="text" 
+        #searchInput type="text" 
           placeholder="Выберите группу..."
           [(ngModel)]="currentInput"
           (focus)="onInputFocus()"
           (blur)="onInputBlur()"
           class="input-no-border"
+
+          (keydown)="onKeyDown($event)" 
+          (input)="focusedIndex.set(-1)"
         >
 
         @if (isDropdownOpen() && dropdownOptions().length > 0) {
           <ul class="dropdown-list">
-            @for (option of dropdownOptions(); track option) {
-              <li (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
+            @for (option of dropdownOptions(); track option; let i = $index) {
+              <li 
+              (mousedown)="$event.preventDefault()" 
+              (click)="selectOption(option)"
+              [class.active]="i === focusedIndex()">
                 {{ option }}
               </li>
             }
