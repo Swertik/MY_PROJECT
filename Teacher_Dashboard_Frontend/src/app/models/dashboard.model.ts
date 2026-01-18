@@ -19,3 +19,9 @@ export interface StudentDashboardItem {
   tasksHistory: HistoryDto[];
   allGroupTasks: TaskDto[];
 }
+
+export interface SearchOption {
+  label: string;
+  type: 'group' | 'student' | 'status';
+  value: string;
+}

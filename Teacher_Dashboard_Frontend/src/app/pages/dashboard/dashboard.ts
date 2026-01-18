@@ -1,5 +1,5 @@
 import { Component, computed, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { StudentDashboardItem } from '../../models/dashboard.model';
+import { SearchOption, StudentDashboardItem } from '../../models/dashboard.model';
 import { Llmservice } from '../../services/llmservice';
 import { FormsModule } from '@angular/forms';
 
@@ -13,7 +13,7 @@ export class Dashboard implements OnInit {
   private raw_data = signal<StudentDashboardItem[]>([]);
 
   currentInput = signal("");
-  searchChips = signal<string[]>([]);
+  searchChips = signal<SearchOption[]>([]);
 
   isDropdownOpen = signal(false);
   focusedIndex = signal(-1);
@@ -34,45 +34,106 @@ export class Dashboard implements OnInit {
     }
   }
 
-  allAvailableOptions = computed(() => {
+  allAvailableOptions = computed<SearchOption[]>(() => {
     const students = this.raw_data();
-    const options = new Set<string>();
+    const options: SearchOption[] = [];
+    const addedGroups = new Set<string>();
+    const typeOrder: Record<string, number> = {
+  'group': 1,
+  'student': 2,
+  'status': 3
+};
+
+    options.push({ label: 'Должники', type: 'status', value: 'debtor' });
+    options.push({ label: 'Сдали всё', type: 'status', value: 'completed' });
 
     students.forEach(s => {
-      options.add(s.fio);
+
+      if (!addedGroups.has(s.groupName)) {
+        options.push({ label: s.groupName, type: 'group', value: s.groupName });
+        addedGroups.add(s.groupName);
+      }
+      
+
+      options.push({ label: s.fio, type: 'student', value: s.fio });
     });
 
-    return Array.from(options).sort();
+    return options.sort((a, b) => {
+  return typeOrder[a.type] - typeOrder[b.type];
+});
   });
+
+  getCategoryName(type: string): string {
+    switch (type) {
+      case 'group':
+        return 'Группы';
+      case 'student':
+        return 'Студенты';
+      case 'status':
+        return 'Статусы и фильтры';
+      default:
+        return 'Прочее';
+    }
+  }
 
 
   dropdownOptions = computed(() => {
     const input = this.currentInput().toLowerCase();
-    const all = this.allAvailableOptions();
-    const currentChips = this.searchChips();
-
-    return all.filter(opt => 
-      opt.toLowerCase().includes(input) &&
-
-      !currentChips.includes(opt)
+    const currentChips = this.searchChips().map(c => c.label);
+    
+    return this.allAvailableOptions().filter(opt => 
+      opt.label.toLowerCase().includes(input) &&
+      !currentChips.includes(opt.label)
     );
   });
 
   filteredData = computed(() => {
-    const raw_data = this.raw_data();
-    const chips = this.searchChips().map(c => c.toLowerCase());
+    const students = this.raw_data();
+    const chips = this.searchChips();
 
-    if (chips.length == 0) return raw_data;
-    var result = raw_data.filter(student => {
-      const fullText = (student.fio + ' ' + student.groupName).toLowerCase();
-      return chips.some(chip => fullText.includes(chip.toLowerCase()));
+    if (chips.length === 0) return students;
+
+    const groupFilters = chips
+      .filter(c => c.type === 'group')
+      .map(c => c.value);
+
+    const statusFilters = chips
+      .filter(c => c.type === 'status')
+      .map(c => c.value);
+
+    const nameFilters = chips
+      .filter(c => c.type === 'student') 
+      .map(c => c.value.toLowerCase());
+
+    return students.filter(student => {
+      
+      const matchesGroup = groupFilters.length === 0 || 
+                           groupFilters.includes(student.groupName);
+
+      const matchesName = nameFilters.length === 0 || 
+                          nameFilters.some(name => student.fio.toLowerCase().includes(name));
+
+      const matchesStatus = statusFilters.length === 0 || 
+                            statusFilters.some(statusVal => this.checkStatus(student, statusVal));
+
+      return matchesGroup && matchesName && matchesStatus;
     });
-    console.log(result);
-    return result;
+  });
 
-  })
+  checkStatus(student: StudentDashboardItem, statusValue: string): boolean {
+    switch (statusValue) {
+      case 'debtor': 
+        return student.tasksHistory.some(t => !t.is_completed);
+      
+      case 'completed':
+        return student.tasksHistory.every(t => t.is_completed);
+        
+      default:
+        return true;
+    }
+  }
 
-  selectOption(option: string) {
+  selectOption(option: SearchOption) {
     this.searchChips.update(chips => [...chips, option]);
     this.currentInput.set('');
     this.focusedIndex.set(-1);
