@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs'; // <--- Import 'of' and 'Observable'
 import { delay } from 'rxjs/operators'; // <--- Import 'delay'
-import { StudentDashboardItem } from '../models/dashboard.model';
+import { HistoryDto, StudentDashboardItem } from '../models/dashboard.model';
 
 @Injectable({
   providedIn: 'root',
@@ -176,5 +176,8 @@ const data = [
   }
 ];
   return of(data).pipe(delay(1000));
+  }
+  createTask(task: HistoryDto): Observable<number> {
+    return of(task.record_id).pipe(delay(500));
   }
 }

@@ -3,13 +3,15 @@ import { SearchOption, StudentDashboardItem } from '../../models/dashboard.model
 import { Llmservice } from '../../services/llmservice';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
+import { ModalForm } from "../../modal-forms/modal-form/modal-form";
+
 
 export type SortCriteria = 'name' | 'performance';
 export type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [FormsModule, NgClass],
+  imports: [FormsModule, NgClass, ModalForm],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -25,7 +27,7 @@ export class Dashboard implements OnInit {
   sortDirection = signal<SortDirection>('asc')
 
 
-  lmsService = inject(Llmservice)
+  lmmService = inject(Llmservice)
 
   @ViewChild('searchInput') searchInputRef!: ElementRef<HTMLInputElement>;
 
@@ -207,7 +209,7 @@ export class Dashboard implements OnInit {
   }
 
   loadData() {
-    this.lmsService.getDashboard([]).subscribe({
+    this.lmmService.getDashboard([]).subscribe({
       next: (data) => this.raw_data.set(data),
       error: (err) => console.error(err)
     });
@@ -258,6 +260,57 @@ export class Dashboard implements OnInit {
     }
   }
 
+  activeStudentForEdit = signal<any | null>(null);
 
+  // Метод открытия (вызывается из кнопки "+" в шаблоне)
+  openTaskModal(student: any) {
+    this.activeStudentForEdit.set(student);
+  }
+
+  // Метод закрытия
+  closeTaskModal() {
+    this.activeStudentForEdit.set(null);
+  }
+
+  // ГЛАВНАЯ ЛОГИКА: Сохранение и обновление данных
+  onAssignTask(result: { taskId: number, isCompleted: boolean }) {
+    const student = this.activeStudentForEdit();
+    if (!student) return;
+
+    // Находим само задание по ID в списке задач группы
+    const taskDefinition = student.allGroupTasks.find((t: any) => t.id === result.taskId);
+
+    // Создаем новую запись истории
+    const newRecord = {
+      record_id: Date.now(), // Генерируем ID
+      assignment_id: result.taskId,
+      task_name: taskDefinition?.name || 'Unknown Task',
+      is_completed: result.isCompleted,
+      date_str: new Date().toLocaleDateString('ru-RU'), // Текущая дата
+      completed_at: result.isCompleted ? new Date().toISOString() : ''
+    };
+
+    // ОБНОВЛЯЕМ СИГНАЛ (Immutable update)
+    this.raw_data.update(currentData => {
+      return currentData.map(s => {
+        // Ищем нашего студента
+        if (s.id === student.id) {
+          return {
+            ...s,
+            // Добавляем запись в его массив tasksHistory
+            tasksHistory: [...s.tasksHistory, newRecord] 
+          };
+        }
+        return s;
+      });
+    });
+
+    this.closeTaskModal();
+
+    this.lmmService.createTask(newRecord).subscribe({
+      next: (recordId) => {
+        console.log(`Задание создано с record_id: ${recordId}`);}
+      });
+  }
   
 }

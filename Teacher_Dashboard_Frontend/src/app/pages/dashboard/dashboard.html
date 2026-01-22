@@ -108,7 +108,7 @@
         <div class="recent-activity">
           <h4>Последние события:</h4>
           <ul>
-            @for (task of student.tasksHistory.slice(0, 3); track task.record_id) {
+            @for (task of student.tasksHistory.slice(-3).reverse(); track task.record_id) {
               <li [class.completed]="task.is_completed">
                 <span class="status-dot"></span>
                 {{ task.task_name }}
@@ -119,9 +119,17 @@
 
         <div class="card-actions">
           <button mat-stroked-button>История</button>
-          <button mat-flat-button color="primary">+ Задание</button>
+          <button mat-flat-button color="primary" (click)="openTaskModal(student)">+ Задание</button>
         </div>
       </div>
     }
   </div>
 </div>
+
+@if (activeStudentForEdit(); as student) {
+  <app-modal-form
+    [student]="student"
+    (close)="closeTaskModal()"
+    (save)="onAssignTask($event)"
+  ></app-modal-form>
+}

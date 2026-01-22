@@ -8,7 +8,7 @@
 }
 
 .dropdown-list {
-  position: absolute;
+  position: relative;
   top: 100%;
   left: 0;
   width: 100%;
@@ -235,4 +235,26 @@
 /* Класс для поворота стрелки */
 .arrow.rotated {
   transform: rotate(180deg);
+}
+
+.btn-icon-add {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #4f46e5;
+  border: 1px solid #e2e8f0;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon-add:hover {
+  background-color: #4f46e5;
+  color: white;
+  transform: scale(1.1);
 }
