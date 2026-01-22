@@ -180,4 +180,7 @@ const data = [
   createTask(task: HistoryDto): Observable<number> {
     return of(task.record_id).pipe(delay(500));
   }
+  deleteTask(recordId: number): Observable<boolean> {
+    return of(true).pipe(delay(500));
+  }
 }

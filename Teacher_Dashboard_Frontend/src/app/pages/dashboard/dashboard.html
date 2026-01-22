@@ -118,7 +118,7 @@
         </div>
 
         <div class="card-actions">
-          <button mat-stroked-button>История</button>
+          <button mat-stroked-button (click)="openHistory(student)">История</button>
           <button mat-flat-button color="primary" (click)="openTaskModal(student)">+ Задание</button>
         </div>
       </div>
@@ -132,4 +132,14 @@
     (close)="closeTaskModal()"
     (save)="onAssignTask($event)"
   ></app-modal-form>
+}
+
+@if (activeStudentForEdit(); as student) { ... }
+
+@if (activeStudentForHistory(); as student) {
+  <app-history-modal
+    [student]="student"
+    (close)="closeHistory()"
+    (deleteRecord)="onDeleteHistoryRecord($event)"
+  ></app-history-modal>
 }

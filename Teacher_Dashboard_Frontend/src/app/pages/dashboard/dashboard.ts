@@ -4,6 +4,7 @@ import { Llmservice } from '../../services/llmservice';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { ModalForm } from "../../modal-forms/modal-form/modal-form";
+import { HistoryModal } from "../../modal-forms/history-modal/history-modal";
 
 
 export type SortCriteria = 'name' | 'performance';
@@ -11,7 +12,7 @@ export type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [FormsModule, NgClass, ModalForm],
+  imports: [FormsModule, NgClass, ModalForm, HistoryModal],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -311,6 +312,43 @@ export class Dashboard implements OnInit {
       next: (recordId) => {
         console.log(`Задание создано с record_id: ${recordId}`);}
       });
+  }
+
+  activeStudentForHistory = signal<any | null>(null);
+
+  openHistory(student: any) {
+    this.activeStudentForHistory.set(student);
+  }
+
+  closeHistory() {
+    this.activeStudentForHistory.set(null);
+  }
+
+  // Метод удаления (принимает ID записи)
+  onDeleteHistoryRecord(recordId: number) {
+    const student = this.activeStudentForHistory();
+    if (!student) return;
+
+    // Обновляем главный массив данных (Immutable update)
+    this.raw_data.update(data => {
+      return data.map(s => {
+        if (s.id === student.id) {
+          // Вычитаем удаленную запись из массива tasksHistory
+          return {
+            ...s,
+            tasksHistory: s.tasksHistory.filter((t: any) => t.record_id !== recordId)
+          };
+        }
+        return s;
+      });
+    });
+
+    // Важно: так как student в сигнале activeStudentForHistory - это ссылка на старый объект,
+    // нам нужно обновить и его, чтобы модалка перерисовалась мгновенно.
+    // Мы берем свежие данные из raw_data:
+    const updatedStudent = this.raw_data().find(s => s.id === student.id);
+    this.activeStudentForHistory.set(updatedStudent);
+    
   }
   
 }
