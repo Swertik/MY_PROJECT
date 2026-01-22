@@ -143,3 +143,28 @@
     (deleteRecord)="onDeleteHistoryRecord($event)"
   ></app-history-modal>
 }
+
+@if (searchChips().length > 0) {
+  <div class="mass-actions-bar" animate.enter="slide-up" animate.leave="slide-down">
+    
+    <div class="mass-info">
+      <span class="count-badge">{{ filteredData().length }}</span>
+      <span class="label">студентов на экране</span>
+    </div>
+
+    <button class="btn-mass-assign" (click)="openMassModal()">
+      <span class="icon">+</span>
+      Выдать задание всем
+    </button>
+  
+  </div>
+}
+
+@if (isMassModalOpen()) {
+  <app-modal-mass-task
+    [count]="filteredData().length"
+    [availableTasks]="commonTasks()"
+    (close)="closeMassModal()"
+    (save)="onMassAssign($event)"
+  ></app-modal-mass-task>
+}

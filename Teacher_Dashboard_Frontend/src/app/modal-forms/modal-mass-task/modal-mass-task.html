@@ -1,0 +1,35 @@
+<div class="modal-backdrop" (click)="close.emit()"></div>
+    <div class="modal-content">
+      
+      <h3>Массовая выдача</h3>
+      
+      <div class="info-alert">
+        Получатели: <b>{{ count() }} студентов</b> <br>
+        (Текущий фильтр)
+      </div>
+
+      <div class="form-group">
+        <label>Выберите задание:</label>
+        <select [ngModel]="selectedTaskId()" (ngModelChange)="selectedTaskId.set($event)">
+          <option [ngValue]="null" disabled>Выберите из списка...</option>
+          @for (task of availableTasks(); track task.id) {
+            <option [ngValue]="task.id">{{ task.name }}</option>
+          }
+        </select>
+        <p class="hint">Показаны задачи, доступные для выбранных групп</p>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" [ngModel]="isCompleted()" (ngModelChange)="isCompleted.set($event)">
+          <span>Отметить как выполненное</span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="close.emit()">Отмена</button>
+        <button class="btn-save" [disabled]="!selectedTaskId()" (click)="saveMass()">
+          Выдать всем ({{ count() }})
+        </button>
+      </div>
+    </div>

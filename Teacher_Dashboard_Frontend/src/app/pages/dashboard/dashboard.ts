@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { ModalForm } from "../../modal-forms/modal-form/modal-form";
 import { HistoryModal } from "../../modal-forms/history-modal/history-modal";
+import { ModalMassTask } from "../../modal-forms/modal-mass-task/modal-mass-task";
 
 
 export type SortCriteria = 'name' | 'performance';
@@ -12,7 +13,7 @@ export type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [FormsModule, NgClass, ModalForm, HistoryModal],
+  imports: [FormsModule, NgClass, ModalForm, HistoryModal, ModalMassTask],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -348,7 +349,81 @@ export class Dashboard implements OnInit {
     // Мы берем свежие данные из raw_data:
     const updatedStudent = this.raw_data().find(s => s.id === student.id);
     this.activeStudentForHistory.set(updatedStudent);
+
+  }
+
+  isMassModalOpen = signal(false);
+
+  // 1. Вычисляем список задач для массовой выдачи.
+  // Логика: берем задачи первого студента из фильтра (предполагаем, что фильтр обычно по группе).
+  // Или собираем уникальные задачи со всех (если фильтр смешанный).
+  commonTasks = computed(() => {
+    const students = this.filteredData();
+    if (students.length === 0) return [];
     
+    // Упрощение: берем список задач первого студента.
+    // В реальном проекте тут нужно пересечение (Intersection) массивов задач.
+    return students[0].allGroupTasks;
+  });
+
+  openMassModal() {
+    this.isMassModalOpen.set(true);
+  }
+
+  closeMassModal() {
+    this.isMassModalOpen.set(false);
+  }
+
+  // 2. МАССОВОЕ ОБНОВЛЕНИЕ
+  onMassAssign(payload: { taskId: number, isCompleted: boolean }) {
+    // Получаем ID всех студентов, которые сейчас на экране
+    const targetStudentIds = new Set(this.filteredData().map(s => s.id));
+    
+    // Находим определение задачи (имя и т.д.)
+    // Берем из commonTasks
+    const taskDef = this.commonTasks().find((t: any) => t.id === payload.taskId);
+    if (!taskDef) return;
+
+    const baseRecord = {
+      assignment_id: payload.taskId,
+      task_name: taskDef.name,
+      is_completed: payload.isCompleted,
+      date_str: new Date().toLocaleDateString('ru-RU')
+    };
+
+    // ОБНОВЛЯЕМ ВСЁ ОДНИМ MAРОМ (Immutable)
+    this.raw_data.update(allData => {
+      return allData.map(student => {
+        // Если студент есть в отфильтрованном списке
+        if (targetStudentIds.has(student.id)) {
+          
+          // Проверяем, нет ли уже такого задания (чтобы не дублировать)
+          // Если можно дублировать - проверку убираем.
+          const alreadyHas = student.tasksHistory.some((t: any) => t.assignment_id === payload.taskId);
+          if (alreadyHas && !payload.isCompleted) {
+             // Если уже есть и мы не закрываем его - пропускаем (или обновляем?)
+             // Допустим, просто добавляем новую запись
+          }
+
+          return {
+            ...student,
+            tasksHistory: [
+              ...student.tasksHistory,
+              {
+                ...baseRecord,
+                record_id: Date.now() + Math.random(), // Уникальный ID для каждой записи
+                completed_at: payload.isCompleted ? new Date().toISOString() : ''
+              }
+            ]
+          };
+        }
+        // Если студент не в фильтре - не трогаем
+        return student;
+      });
+    });
+
+    this.closeMassModal();
+    // Тут можно добавить Toast уведомление: "Задание выдано 25 студентам"
   }
   
 }
