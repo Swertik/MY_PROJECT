@@ -7,7 +7,7 @@
 /bazel-out
 
 # Node
-/Teacher_Dashboard_Frontend/node_modules
+/Teacher_Dashboard_Frontend
 /node_modules
 npm-debug.log
 yarn-error.log
