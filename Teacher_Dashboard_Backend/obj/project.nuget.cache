@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "gyPp8Jh2tKg=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\herob\\Главная\\proj\\MY_PROJECT\\Teacher_Dashboard_Backend\\Teacher_Dashboard_Backend.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\herob\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.1\\microsoft.aspnetcore.openapi.10.0.1.nupkg.sha512",
+    "C:\\Users\\herob\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
