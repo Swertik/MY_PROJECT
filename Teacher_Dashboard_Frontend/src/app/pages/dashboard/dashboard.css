@@ -154,3 +154,85 @@
   background: #fafafa;  
   user-select: none;     
 }
+
+.green {
+  background-color: #4caf50 !important;
+}
+
+.red {
+  background-color: #f44336 !important;
+}
+
+.orange {
+  background-color: #ff9800 !important;
+}
+
+/* --- Контейнер панели --- */
+.toolbar {
+  display: flex;
+  justify-content: space-between; /* Разносим по краям */
+  align-items: center;
+  margin-bottom: 24px; /* Отступ от поиска */
+  padding: 0 4px;
+}
+
+.results-count {
+  color: #64748b; /* Серый цвет текста */
+  font-size: 14px;
+}
+
+.results-count b {
+  color: #334155; /* Более темный для цифры */
+}
+
+/* --- Группа кнопок (фон-подложка) --- */
+.sort-group {
+  display: flex;
+  background-color: #f1f5f9; /* Светло-серый фон */
+  padding: 4px;
+  border-radius: 8px; /* Скругление контейнера */
+  gap: 4px; /* Расстояние между кнопками */
+}
+
+/* --- Сама кнопка (базовый стиль) --- */
+.sort-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 6px;
+  
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b; /* Цвет неактивного текста */
+  
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Отступ до стрелочки */
+  transition: all 0.2s ease; /* Плавная анимация */
+  user-select: none; /* Чтобы текст не выделялся при кликах */
+}
+
+.sort-btn:hover {
+  color: #334155; /* Чуть темнее при наведении */
+}
+
+/* --- Активная кнопка --- */
+.sort-btn.active {
+  background-color: #ffffff; /* Белый фон */
+  color: #4f46e5; /* Индиго (или любой ваш акцентный цвет) */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+/* --- Стрелочка --- */
+.arrow {
+  display: inline-block;
+  font-size: 12px;
+  transition: transform 0.2s ease; /* Анимация поворота */
+}
+
+/* Класс для поворота стрелки */
+.arrow.rotated {
+  transform: rotate(180deg);
+}

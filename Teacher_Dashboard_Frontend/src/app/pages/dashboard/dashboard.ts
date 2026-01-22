@@ -2,10 +2,14 @@ import { Component, computed, ElementRef, HostListener, inject, OnInit, signal, 
 import { SearchOption, StudentDashboardItem } from '../../models/dashboard.model';
 import { Llmservice } from '../../services/llmservice';
 import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
+
+export type SortCriteria = 'name' | 'performance';
+export type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [FormsModule],
+  imports: [FormsModule, NgClass],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -17,6 +21,9 @@ export class Dashboard implements OnInit {
 
   isDropdownOpen = signal(false);
   focusedIndex = signal(-1);
+  sortCriteria = signal<SortCriteria>('name');
+  sortDirection = signal<SortDirection>('asc')
+
 
   lmsService = inject(Llmservice)
 
@@ -76,6 +83,13 @@ export class Dashboard implements OnInit {
     }
   }
 
+  getProgressBarColor(student_tasks: number, group_tasks: number): string {
+    const percentage = (student_tasks / group_tasks) * 100;
+    if (percentage >= 80) return 'green';
+    if (percentage >= 50) return 'orange';
+    return 'red';
+  }
+
 
   dropdownOptions = computed(() => {
     const input = this.currentInput().toLowerCase();
@@ -91,6 +105,22 @@ export class Dashboard implements OnInit {
     const students = this.raw_data();
     const chips = this.searchChips();
 
+    const criteria = this.sortCriteria();
+    const direction = this.sortDirection() === 'asc' ? 1 : -1;
+
+    var result = students.sort((a,b) => {
+      if (criteria == 'name'){
+        return a.fio.localeCompare(b.fio) * direction
+      }
+      else if (criteria == 'performance') {
+        const progressA = this.calculateProgress(a);
+        const progressB = this.calculateProgress(b);
+        return (progressA - progressB) * direction;
+      }
+
+      return 0
+    })
+
     if (chips.length === 0) return students;
 
     const groupFilters = chips
@@ -105,7 +135,7 @@ export class Dashboard implements OnInit {
       .filter(c => c.type === 'student') 
       .map(c => c.value.toLowerCase());
 
-    return students.filter(student => {
+    result = result.filter(student => {
       
       const matchesGroup = groupFilters.length === 0 || 
                            groupFilters.includes(student.groupName);
@@ -118,15 +148,33 @@ export class Dashboard implements OnInit {
 
       return matchesGroup && matchesName && matchesStatus;
     });
+
+    return result
   });
+
+  calculateProgress(student: any): number {
+    if (!student.allGroupTasks || student.allGroupTasks.length === 0) return 0;
+    
+    const completedCount = student.tasksHistory.filter((t: any) => t.is_completed).length;
+    return (completedCount / student.allGroupTasks.length) * 100;
+  }
+
+  toggleSort(criteria: SortCriteria) {
+    if (this.sortCriteria() === criteria) {
+      this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortCriteria.set(criteria);
+      this.sortDirection.set(criteria === 'performance' ? 'desc' : 'asc');
+    }
+  }
 
   checkStatus(student: StudentDashboardItem, statusValue: string): boolean {
     switch (statusValue) {
       case 'debtor': 
-        return student.tasksHistory.some(t => !t.is_completed);
+        return student.tasksHistory.length === 0 || student.tasksHistory.some(t => !t.is_completed);
       
       case 'completed':
-        return student.tasksHistory.every(t => t.is_completed);
+        return student.tasksHistory.length !== 0 && student.tasksHistory.every(t => t.is_completed);
         
       default:
         return true;

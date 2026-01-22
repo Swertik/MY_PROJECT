@@ -19,7 +19,6 @@
           class="input-border"
           (keydown)="onKeyDown($event)"
           (input)="focusedIndex.set(-1)"
-          
         />
 
         @if (isDropdownOpen() && dropdownOptions().length > 0) {
@@ -58,6 +57,33 @@
     </div>
 
     <div class="hint">Найдено: {{ filteredData().length }}</div>
+    <div class="toolbar">
+  <div class="sort-group">
+    
+    <button 
+      class="sort-btn" 
+      [class.active]="sortCriteria() === 'name'"
+      (click)="toggleSort('name')"
+    >
+      По имени
+      @if (sortCriteria() === 'name') {
+        <span class="arrow" [class.rotated]="sortDirection() === 'desc'">↓</span>
+      }
+    </button>
+
+    <button 
+      class="sort-btn" 
+      [class.active]="sortCriteria() === 'performance'"
+      (click)="toggleSort('performance')"
+    >
+      По успеваемости
+      @if (sortCriteria() === 'performance') {
+        <span class="arrow" [class.rotated]="sortDirection() === 'asc'">↓</span>
+      }
+    </button>
+
+  </div>
+</div>
   </div>
 
   <div class="cards-grid">
@@ -75,7 +101,7 @@
         <div class="progress-section">
           <label>Сдано работ: {{ student.tasksHistory.length }}</label>
           <div class="progress-bar">
-            <div class="fill" [style.width.%]="(student.tasksHistory.length / 10) * 100"></div>
+            <div class="fill" [style.width.%]="(student.tasksHistory.length / student.allGroupTasks.length) * 100" [ngClass]="getProgressBarColor(student.tasksHistory.length, student.allGroupTasks.length)"></div>
           </div>
         </div>
 
