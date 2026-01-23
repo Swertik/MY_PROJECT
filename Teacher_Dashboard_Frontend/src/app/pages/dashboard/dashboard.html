@@ -1,0 +1,170 @@
+<div class="dashboard-container">
+  <div class="search-area">
+    <div class="chips-input-container">
+      @for (chip of searchChips(); track $index) {
+        <div class="chip">
+          <span>{{ chip.label }}</span>
+          <button (click)="removeChip($index)" class="chip-remove">×</button>
+        </div>
+      }
+
+      <div class="input-wrapper" style="position: relative; flex-grow: 1">
+        <input
+          #searchInput
+          type="text"
+          placeholder="Выберите студентов..."
+          [(ngModel)]="currentInput"
+          (focus)="onInputFocus()"
+          (blur)="onInputBlur()"
+          class="input-border"
+          (keydown)="onKeyDown($event)"
+          (input)="focusedIndex.set(-1)"
+        />
+
+        @if (isDropdownOpen() && dropdownOptions().length > 0) {
+          <ul class="dropdown-list">
+            @for (option of dropdownOptions(); track option.value; let i = $index) {
+              @if (i === 0 || option.type !== dropdownOptions()[i - 1].type) {
+                <li class="category-header" (mousedown)="$event.preventDefault()">
+                  {{ getCategoryName(option.type) }}
+                </li>
+              }
+
+              <li
+                (mousedown)="$event.preventDefault()"
+                (click)="selectOption(option)"
+                [class.active]="i === focusedIndex()"
+                class="option-item"
+              >
+                <span class="icon">
+                  @if (option.type === 'group') {
+                    📁
+                  }
+                  @if (option.type === 'student') {
+                    👤
+                  }
+                  @if (option.type === 'status') {
+                    ⚡
+                  }
+                </span>
+
+                {{ option.label }}
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+
+    <div class="hint">Найдено: {{ filteredData().length }}</div>
+    <div class="toolbar">
+  <div class="sort-group">
+    
+    <button 
+      class="sort-btn" 
+      [class.active]="sortCriteria() === 'name'"
+      (click)="toggleSort('name')"
+    >
+      По имени
+      @if (sortCriteria() === 'name') {
+        <span class="arrow" [class.rotated]="sortDirection() === 'desc'">↓</span>
+      }
+    </button>
+
+    <button 
+      class="sort-btn" 
+      [class.active]="sortCriteria() === 'performance'"
+      (click)="toggleSort('performance')"
+    >
+      По успеваемости
+      @if (sortCriteria() === 'performance') {
+        <span class="arrow" [class.rotated]="sortDirection() === 'asc'">↓</span>
+      }
+    </button>
+
+  </div>
+</div>
+  </div>
+
+  <div class="cards-grid">
+    @for (student of filteredData(); track student.id) {
+      <div class="student-card">
+        <div class="card-header">
+          <div class="avatar-placeholder">{{ student.fio[0] }}</div>
+          <div class="student-info">
+            <h3>{{ student.fio }}</h3>
+            <span class="group-badge">{{ student.groupName }}</span>
+          </div>
+          <button class="more-btn">⋮</button>
+        </div>
+
+        <div class="progress-section">
+          <label>Сдано работ: {{ student.tasksHistory.length }}</label>
+          <div class="progress-bar">
+            <div class="fill" [style.width.%]="(student.tasksHistory.length / student.allGroupTasks.length) * 100" [ngClass]="getProgressBarColor(student.tasksHistory.length, student.allGroupTasks.length)"></div>
+          </div>
+        </div>
+
+        <div class="recent-activity">
+          <h4>Последние события:</h4>
+          <ul>
+            @for (task of student.tasksHistory.slice(-3).reverse(); track task.record_id) {
+              <li [class.completed]="task.is_completed">
+                <span class="status-dot"></span>
+                {{ task.task_name }}
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="card-actions">
+          <button mat-stroked-button (click)="openHistory(student)">История</button>
+          <button mat-flat-button color="primary" (click)="openTaskModal(student)">+ Задание</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (activeStudentForEdit(); as student) {
+  <app-modal-form
+    [student]="student"
+    (close)="closeTaskModal()"
+    (save)="onAssignTask($event)"
+  ></app-modal-form>
+}
+
+@if (activeStudentForEdit(); as student) { ... }
+
+@if (activeStudentForHistory(); as student) {
+  <app-history-modal
+    [student]="student"
+    (close)="closeHistory()"
+    (deleteRecord)="onDeleteHistoryRecord($event)"
+  ></app-history-modal>
+}
+
+@if (searchChips().length > 0) {
+  <div class="mass-actions-bar" animate.enter="slide-up" animate.leave="slide-down">
+    
+    <div class="mass-info">
+      <span class="count-badge">{{ filteredData().length }}</span>
+      <span class="label">студентов на экране</span>
+    </div>
+
+    <button class="btn-mass-assign" (click)="openMassModal()">
+      <span class="icon">+</span>
+      Выдать задание всем
+    </button>
+  
+  </div>
+}
+
+@if (isMassModalOpen()) {
+  <app-modal-mass-task
+    [count]="filteredData().length"
+    [availableTasks]="commonTasks()"
+    (close)="closeMassModal()"
+    (save)="onMassAssign($event)"
+  ></app-modal-mass-task>
+}
