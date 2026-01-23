@@ -1,0 +1,6 @@
+@Teacher_Dashboard_Backend_HostAddress = http://localhost:5050
+
+GET {{Teacher_Dashboard_Backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

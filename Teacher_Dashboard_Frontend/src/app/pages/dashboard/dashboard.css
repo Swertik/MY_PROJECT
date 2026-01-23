@@ -1,0 +1,418 @@
+
+
+.input-border {
+  width: 30%;
+  padding: 8px 0;
+  font-size: 14px;
+
+}
+
+.dropdown-list {
+  position: relative;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  min-width: 200px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin: 4px 0 0 0;
+  padding: 0;
+  list-style: none;
+  z-index: 1000;
+}
+
+.dropdown-list li {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s;
+}
+
+.dropdown-list li:last-child {
+  border-bottom: none;
+}
+
+.dropdown-list li:not(.category-header):hover,
+.dropdown-list li.active {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.student-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.student-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  background-color: #3f51b5;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.student-info h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.group-badge {
+  font-size: 12px;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #666;
+}
+
+
+.progress-bar {
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progress-bar .fill {
+  height: 100%;
+  background: #4caf50;
+}
+
+
+.recent-activity ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-activity li {
+  font-size: 13px;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ff9800;
+}
+
+.recent-activity li.completed .status-dot {
+  background-color: #4caf50;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.input-wrapper {
+  position: relative; 
+  flex-grow: 1;
+}
+
+.category-header {
+  cursor: default !important;    
+  background: #fafafa;  
+  user-select: none;     
+}
+
+.green {
+  background-color: #4caf50 !important;
+}
+
+.red {
+  background-color: #f44336 !important;
+}
+
+.orange {
+  background-color: #ff9800 !important;
+}
+
+/* --- Контейнер панели --- */
+.toolbar {
+  display: flex;
+  justify-content: space-between; /* Разносим по краям */
+  align-items: center;
+  margin-bottom: 24px; /* Отступ от поиска */
+  padding: 0 4px;
+}
+
+.results-count {
+  color: #64748b; /* Серый цвет текста */
+  font-size: 14px;
+}
+
+.results-count b {
+  color: #334155; /* Более темный для цифры */
+}
+
+/* --- Группа кнопок (фон-подложка) --- */
+.sort-group {
+  display: flex;
+  background-color: #f1f5f9; /* Светло-серый фон */
+  padding: 4px;
+  border-radius: 8px; /* Скругление контейнера */
+  gap: 4px; /* Расстояние между кнопками */
+}
+
+/* --- Сама кнопка (базовый стиль) --- */
+.sort-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 6px;
+  
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b; /* Цвет неактивного текста */
+  
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Отступ до стрелочки */
+  transition: all 0.2s ease; /* Плавная анимация */
+  user-select: none; /* Чтобы текст не выделялся при кликах */
+}
+
+.sort-btn:hover {
+  color: #334155; /* Чуть темнее при наведении */
+}
+
+/* --- Активная кнопка --- */
+.sort-btn.active {
+  background-color: #ffffff; /* Белый фон */
+  color: #4f46e5; /* Индиго (или любой ваш акцентный цвет) */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+/* --- Стрелочка --- */
+.arrow {
+  display: inline-block;
+  font-size: 12px;
+  transition: transform 0.2s ease; /* Анимация поворота */
+}
+
+/* Класс для поворота стрелки */
+.arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.btn-icon-add {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #4f46e5;
+  border: 1px solid #e2e8f0;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon-add:hover {
+  background-color: #4f46e5;
+  color: white;
+  transform: scale(1.1);
+}
+
+.mass-actions-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%); /* Центрируем по горизонтали */
+  
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  
+  background: #1e293b; /* Темный фон для контраста */
+  color: white;
+  padding: 12px 20px;
+  border-radius: 50px; /* Полное скругление (Pill shape) */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  
+  /* Для анимации */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mass-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.count-badge {
+  background: white;
+  color: #1e293b;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.btn-mass-assign {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.btn-mass-assign:hover {
+  background: #6366f1;
+}
+
+.icon { font-size: 18px; line-height: 1; }
+
+/* Анимации появления (через @starting-style) */
+@starting-style {
+  .mass-actions-bar {
+    transform: translate(-50%, 100%); /* Уезжает вниз */
+    opacity: 0;
+  }
+}
+
+.slide-down {
+  transform: translate(-50%, 150%);
+  opacity: 0;
+}
+/* Стили для заголовка дашборда */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 30px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.welcome-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.role-badge.admin {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.role-badge.teacher {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-btn {
+  padding: 8px 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.admin-btn:hover {
+  background: #1565c0;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #d32f2f;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

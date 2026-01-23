@@ -1,0 +1,116 @@
+<div class="admin-container">
+  <!-- Заголовок -->
+  <div class="admin-header">
+    <div class="header-info">
+      <h1>Панель администратора</h1>
+      <span class="welcome-text">Добро пожаловать, {{ authService.currentUsername() }}!</span>
+    </div>
+    <div class="header-actions">
+      <button class="dashboard-btn" (click)="goToDashboard()">
+        К дашборду
+      </button>
+      <button class="logout-btn" (click)="logout()">
+        Выйти
+      </button>
+    </div>
+  </div>
+
+  <!-- Статистика по группам -->
+  <div class="statistics-section">
+    <h2>Статистика по группам</h2>
+    
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <span>Загрузка статистики...</span>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="error-message">
+        {{ errorMessage() }}
+        <button (click)="loadStatistics()" class="retry-btn">Повторить</button>
+      </div>
+    }
+
+    @if (!isLoading() && !errorMessage() && statistics().length > 0) {
+      <div class="stats-grid">
+        @for (stat of statistics(); track stat.groupName) {
+          <div class="stat-card">
+            <div class="card-header">
+              <h3>{{ stat.groupName }}</h3>
+              <div class="percentage" [ngClass]="getProgressColor(stat.completionPercentage)">
+                {{ stat.completionPercentage }}%
+              </div>
+            </div>
+            
+            <div class="progress-bar">
+              <div 
+                class="progress-fill" 
+                [ngClass]="getProgressColor(stat.completionPercentage)"
+                [style.width.%]="stat.completionPercentage">
+              </div>
+            </div>
+            
+            <div class="stats-details">
+              <div class="stat-item">
+                <span class="label">Студентов:</span>
+                <span class="value">{{ stat.totalStudents }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">Заданий:</span>
+                <span class="value">{{ stat.totalAssignments }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">Выполнено:</span>
+                <span class="value">{{ stat.completedAssignments }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!isLoading() && !errorMessage() && statistics().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <h3>Нет данных</h3>
+        <p>Статистика по группам пока недоступна</p>
+      </div>
+    }
+  </div>
+
+  <!-- Быстрые действия -->
+  <div class="quick-actions">
+    <h2>Быстрые действия</h2>
+    <div class="actions-grid">
+      <div class="action-card">
+        <div class="action-icon">👥</div>
+        <h3>Управление группами</h3>
+        <p>Создание, редактирование и удаление групп</p>
+        <button class="action-btn" disabled>Скоро</button>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">📝</div>
+        <h3>Управление заданиями</h3>
+        <p>Создание и редактирование заданий для групп</p>
+        <button class="action-btn" disabled>Скоро</button>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">👤</div>
+        <h3>Управление пользователями</h3>
+        <p>Добавление и редактирование пользователей системы</p>
+        <button class="action-btn" disabled>Скоро</button>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">📈</div>
+        <h3>Отчеты</h3>
+        <p>Генерация отчетов по успеваемости</p>
+        <button class="action-btn" disabled>Скоро</button>
+      </div>
+    </div>
+  </div>
+</div>
