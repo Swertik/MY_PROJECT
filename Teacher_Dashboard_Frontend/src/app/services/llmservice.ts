@@ -13,7 +13,9 @@ export class Llmservice {
   http = inject(HttpClient);
 
   getDashboard(): Observable<StudentDashboardItem[]> {
-    return this.http.get<StudentDashboardItem[]>(`${this.apiUrl}/Dashboard`);
+    var result = this.http.get<StudentDashboardItem[]>(`${this.apiUrl}/Dashboard`);
+    console.log('Fetching dashboard data from API...', result);
+    return result;
   }
   createTask(studentId: number, task: HistoryDto): Observable<number> {
     return this.http.post<number>(`${this.apiUrl}/CompletedAssignment/toggle`, {

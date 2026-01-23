@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Teacher_Dashboard_Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9cd95dc5c6ce9f4bbfe8377d54003ec2f552880c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4c0f152841f06b4cd7faeddb5e56df8c287d5685")]
 [assembly: System.Reflection.AssemblyProductAttribute("Teacher_Dashboard_Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Teacher_Dashboard_Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

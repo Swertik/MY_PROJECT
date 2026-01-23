@@ -1,5 +1,6 @@
-using Teacher_Dashboard_Backend.Repositories;
-using Teacher_Dashboard_Backend.Services;
+using Teacher_Dashboard_Backend.Models;
+using Microsoft.EntityFrameworkCore;
+using Teacher_Dashboard_Backend.Data; // Твой namespace с контекстом
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,13 +26,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddOpenApi();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
 builder.Services.AddControllers();
-builder.Services.AddSingleton<DatabaseService>();
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IGroupRepository, GroupRepository>();
-builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
-builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
-builder.Services.AddScoped<ICompletedAssigmentRepository, CompletedAssignmentRepository>();
+
 
 builder.Services.AddEndpointsApiExplorer(); // <--- Нужно для минимальных API, но полезно оставить
 builder.Services.AddSwaggerGen();           // <--- Сам генератор Swagger
@@ -46,6 +47,22 @@ if (app.Environment.IsDevelopment())
 } else
 {
     app.UseCors("AllowAngularClient");
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        // Запускаем наш инициализатор
+        DbInitializer.Initialize(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred creating the DB.");
+    }
 }
 
 app.UseHttpsRedirection();

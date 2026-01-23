@@ -1,39 +1,34 @@
 using Microsoft.AspNetCore.Mvc;
-using Teacher_Dashboard_Backend.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Teacher_Dashboard_Backend.Models;
+
 
 [ApiController]
-[Route("api/[controller]")] // Сюда прилетают запросы из браузера
+[Route("api/[controller]")]
 public class StudentsController : ControllerBase
 {
-    // 1. Объявляем, что нам нужен Репозиторий
-    private readonly IStudentRepository _repository;
+    private readonly AppDbContext _context;
 
-    // 2. В конструкторе получаем готовый Репозиторий (ASP.NET сам его сюда подставит)
-    public StudentsController(IStudentRepository repository)
+    // Внедряем контекст напрямую
+    public StudentsController(AppDbContext context)
     {
-        _repository = repository;
+        _context = context;
     }
 
-    // 3. Метод, который слушает GET запросы
     [HttpGet]
-    public IActionResult GetAllStudents()
+    public async Task<IEnumerable<Student>> GetStudents()
     {
-        // Контроллер САМ не ищет данные. Он говорит Репозиторию: "Дай данные".
-        var students = _repository.GetAll(); 
-        
-        // И просто возвращает их с кодом 200 OK
-        return Ok(students);
+        // Используем DbSet как репозиторий
+        return await _context.Students
+            .Include(s => s.Group) // Сразу подгружаем группу (JOIN)
+            .ToListAsync();
     }
-
-    [HttpGet("{id}")]
-    public IActionResult GetStudent(int id)
+    
+    [HttpPost]
+    public async Task<IActionResult> Create(Student student)
     {
-        // Опять же, делегируем работу Репозиторию
-        var student = _repository.GetById(id);
-
-        if (student == null)
-            return NotFound(); // 404, если не нашел
-
+        _context.Students.Add(student);
+        await _context.SaveChangesAsync(); // Unit of Work: сохраняем транзакцию
         return Ok(student);
     }
 }

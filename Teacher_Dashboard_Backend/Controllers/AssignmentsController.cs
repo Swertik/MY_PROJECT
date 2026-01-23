@@ -1,22 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
-using Teacher_Dashboard_Backend.Repositories;
+
 
 [ApiController]
 [Route("api/[controller]")]
 public class AssignmentsController : ControllerBase
 {
-    private readonly IAssignmentRepository _repo;
+    private readonly AppDbContext _context;
 
     // Внедряем интерфейс
-    public AssignmentsController(IAssignmentRepository repo)
+    public AssignmentsController(AppDbContext context)
     {
-        _repo = repo;
+        _context = context;
     }
 
     [HttpGet("by-group/{groupId}")]
     public IActionResult GetByGroupId(int groupId)
     {
-        var assignments = _repo.GetByGroupId(groupId);
+        var assignments = _context.Assignments.Where(a => a.GroupId == groupId).ToList();
         return Ok(assignments);
     }
 }
