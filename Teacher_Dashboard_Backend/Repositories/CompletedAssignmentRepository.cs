@@ -1,13 +1,14 @@
 namespace Teacher_Dashboard_Backend.Repositories;
 
+using Microsoft.AspNetCore.Mvc;
 using Teacher_Dashboard_Backend.Models;
 using Teacher_Dashboard_Backend.Services;
 
-public class CompletedAssigmentRepository : ICompletedAssigmentRepository
+public class CompletedAssignmentRepository : ICompletedAssigmentRepository
 {
     private readonly DatabaseService _context;
 
-    public CompletedAssigmentRepository(DatabaseService context)
+    public CompletedAssignmentRepository(DatabaseService context)
     {
         _context = context;
     }
@@ -31,8 +32,8 @@ public class CompletedAssigmentRepository : ICompletedAssigmentRepository
         if (record == null)
         {
             // Создаем новую запись, если её не было
-            var student = _context.Students.First(s => s.Id == studentId);
-            var assignment = _context.Assignments.First(a => a.Id == assignmentId);
+            var student = _context.Students.FirstOrDefault(s => s.Id == studentId);
+            var assignment = _context.Assignments.FirstOrDefault(a => a.Id == assignmentId);
 
             int newId = _context.CompletedAssignments.Any() ? _context.CompletedAssignments.Max(c => c.Id) + 1 : 1;
 
@@ -56,5 +57,15 @@ public class CompletedAssigmentRepository : ICompletedAssigmentRepository
         }
 
         return record;
+    }
+
+    public CompletedAssignment? AddBulk(int[] studentIds, int assignmentId, bool isCompleted)
+    {
+        CompletedAssignment? lastRecord = null;
+        foreach (var studentId in studentIds)
+        {
+            lastRecord = ToggleStatus(studentId, assignmentId, isCompleted);
+        }
+        return lastRecord;
     }
 }

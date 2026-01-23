@@ -34,4 +34,11 @@ public class CompletedAssignmentController : ControllerBase
         var result = _repo.ToggleStatus(studentId, assignmentId, isCompleted);
         return Ok(result);
     }
+
+    [HttpPost("massCreate")]
+    public IActionResult CreateMassCompletedAssignments(int[] studentIds, int assignmentId,  bool isCompleted)
+    {
+        var result = _repo.AddBulk(studentIds, assignmentId, isCompleted);
+        return Ok(result);
+    }
 }

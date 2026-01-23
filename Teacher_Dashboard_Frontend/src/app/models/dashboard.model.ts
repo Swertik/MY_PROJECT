@@ -1,10 +1,9 @@
 export interface HistoryDto {
-  record_id: number;
-  assignment_id: number;
-  task_name: string;
-  is_completed: boolean;
-  date_str: string;
-  completed_at: string;
+  recordId: number;
+  assignmentId: number;
+  taskName: string;
+  isCompleted: boolean;
+  completedAt: string | null;
 }
 
 export interface TaskDto {

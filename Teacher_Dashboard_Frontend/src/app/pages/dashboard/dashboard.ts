@@ -119,6 +119,7 @@ export class Dashboard implements OnInit {
       else if (criteria == 'performance') {
         const progressA = this.calculateProgress(a);
         const progressB = this.calculateProgress(b);
+        console.log(progressA, progressB);
         return (progressA - progressB) * direction;
       }
 
@@ -156,10 +157,10 @@ export class Dashboard implements OnInit {
     return result
   });
 
-  calculateProgress(student: any): number {
+  calculateProgress(student: StudentDashboardItem): number {
     if (!student.allGroupTasks || student.allGroupTasks.length === 0) return 0;
     
-    const completedCount = student.tasksHistory.filter((t: any) => t.is_completed).length;
+    const completedCount = student.tasksHistory.filter((t: any) => t.isCompleted).length;
     return (completedCount / student.allGroupTasks.length) * 100;
   }
 
@@ -175,10 +176,10 @@ export class Dashboard implements OnInit {
   checkStatus(student: StudentDashboardItem, statusValue: string): boolean {
     switch (statusValue) {
       case 'debtor': 
-        return student.tasksHistory.length === 0 || student.tasksHistory.some(t => !t.is_completed);
+        return student.tasksHistory.length === 0 || student.tasksHistory.some(t => !t.isCompleted);
       
       case 'completed':
-        return student.tasksHistory.length !== 0 && student.tasksHistory.every(t => t.is_completed);
+        return student.tasksHistory.length !== 0 && student.tasksHistory.every(t => t.isCompleted);
         
       default:
         return true;
@@ -211,7 +212,7 @@ export class Dashboard implements OnInit {
   }
 
   loadData() {
-    this.lmmService.getDashboard([]).subscribe({
+    this.lmmService.getDashboard().subscribe({
       next: (data) => this.raw_data.set(data),
       error: (err) => console.error(err)
     });
@@ -284,12 +285,12 @@ export class Dashboard implements OnInit {
 
     // Создаем новую запись истории
     const newRecord = {
-      record_id: Date.now(), // Генерируем ID
-      assignment_id: result.taskId,
-      task_name: taskDefinition?.name || 'Unknown Task',
-      is_completed: result.isCompleted,
-      date_str: new Date().toLocaleDateString('ru-RU'), // Текущая дата
-      completed_at: result.isCompleted ? new Date().toISOString() : ''
+      recordId: Date.now(), // Генерируем ID
+      assignmentId: result.taskId,
+      taskName: taskDefinition?.name || 'Unknown Task',
+      isCompleted: result.isCompleted,
+      dateStr: new Date().toLocaleDateString('ru-RU'), // Текущая дата
+      completedAt: result.isCompleted ? new Date().toISOString() : ''
     };
 
     // ОБНОВЛЯЕМ СИГНАЛ (Immutable update)
@@ -309,7 +310,7 @@ export class Dashboard implements OnInit {
 
     this.closeTaskModal();
 
-    this.lmmService.createTask(newRecord).subscribe({
+    this.lmmService.createTask(student.id, newRecord).subscribe({
       next: (recordId) => {
         console.log(`Задание создано с record_id: ${recordId}`);}
       });
@@ -357,14 +358,34 @@ export class Dashboard implements OnInit {
   // 1. Вычисляем список задач для массовой выдачи.
   // Логика: берем задачи первого студента из фильтра (предполагаем, что фильтр обычно по группе).
   // Или собираем уникальные задачи со всех (если фильтр смешанный).
-  commonTasks = computed(() => {
-    const students = this.filteredData();
-    if (students.length === 0) return [];
-    
-    // Упрощение: берем список задач первого студента.
-    // В реальном проекте тут нужно пересечение (Intersection) массивов задач.
-    return students[0].allGroupTasks;
-  });
+commonTasks = computed(() => {
+  const students = this.filteredData();
+
+  // 1. Если студентов нет — возвращаем пустой список
+  if (students.length === 0) return [];
+
+  // 2. Берем задачи первого студента как "эталонный" список.
+  // Мы будем постепенно удалять из него задачи, которых нет у других.
+  let result = [...students[0].allGroupTasks];
+
+  // 3. Проходим по всем остальным студентам (начиная со второго)
+  for (let i = 1; i < students.length; i++) {
+    const student = students[i];
+
+    // Создаем Set из ID задач текущего студента для мгновенного поиска (O(1))
+    const currentStudentTaskIds = new Set(student.allGroupTasks.map(t => t.id));
+
+    // Фильтруем "эталонный" список:
+    // Оставляем только те задачи, ID которых найдены у текущего студента
+    result = result.filter(task => currentStudentTaskIds.has(task.id));
+
+    // Оптимизация: Если в процессе список стал пустым (нет общих задач),
+    // можно сразу выходить, дальше искать смысла нет.
+    if (result.length === 0) return [];
+  }
+
+  return result;
+});
 
   openMassModal() {
     this.isMassModalOpen.set(true);
@@ -375,55 +396,72 @@ export class Dashboard implements OnInit {
   }
 
   // 2. МАССОВОЕ ОБНОВЛЕНИЕ
-  onMassAssign(payload: { taskId: number, isCompleted: boolean }) {
-    // Получаем ID всех студентов, которые сейчас на экране
-    const targetStudentIds = new Set(this.filteredData().map(s => s.id));
-    
-    // Находим определение задачи (имя и т.д.)
-    // Берем из commonTasks
-    const taskDef = this.commonTasks().find((t: any) => t.id === payload.taskId);
-    if (!taskDef) return;
-
-    const baseRecord = {
-      assignment_id: payload.taskId,
-      task_name: taskDef.name,
-      is_completed: payload.isCompleted,
-      date_str: new Date().toLocaleDateString('ru-RU')
-    };
-
-    // ОБНОВЛЯЕМ ВСЁ ОДНИМ MAРОМ (Immutable)
-    this.raw_data.update(allData => {
-      return allData.map(student => {
-        // Если студент есть в отфильтрованном списке
-        if (targetStudentIds.has(student.id)) {
-          
-          // Проверяем, нет ли уже такого задания (чтобы не дублировать)
-          // Если можно дублировать - проверку убираем.
-          const alreadyHas = student.tasksHistory.some((t: any) => t.assignment_id === payload.taskId);
-          if (alreadyHas && !payload.isCompleted) {
-             // Если уже есть и мы не закрываем его - пропускаем (или обновляем?)
-             // Допустим, просто добавляем новую запись
-          }
-
-          return {
-            ...student,
-            tasksHistory: [
-              ...student.tasksHistory,
-              {
-                ...baseRecord,
-                record_id: Date.now() + Math.random(), // Уникальный ID для каждой записи
-                completed_at: payload.isCompleted ? new Date().toISOString() : ''
-              }
-            ]
-          };
-        }
-        // Если студент не в фильтре - не трогаем
-        return student;
-      });
-    });
-
-    this.closeMassModal();
-    // Тут можно добавить Toast уведомление: "Задание выдано 25 студентам"
-  }
+onMassAssign(payload: { taskId: number, isCompleted: boolean }) {
+  // 1. Identify the students (Existing logic)
+  const targetStudentIdsSet = new Set(this.filteredData().map(s => s.id));
   
+  // Convert Set to Array for the API
+  const studentIdsArray = Array.from(targetStudentIdsSet);
+
+  if (studentIdsArray.length === 0) return;
+
+  // --- API CALL START ---
+  // We trigger this immediately. We don't wait for it to finish to update the UI.
+  // Make sure to inject your service in the constructor (e.g., private taskService: YourService)
+  this.lmmService.createMassTask(studentIdsArray, payload.taskId, payload.isCompleted)
+    .subscribe({
+      next: (result) => {
+        console.log(`Backend successfully updated ${studentIdsArray.length} students.`);
+      },
+      error: (err) => {
+        console.error('Backend update failed:', err);
+        // Optional: Add logic here to revert the UI changes if the server fails
+        // or show a notification like "Failed to save changes"
+      }
+    });
+  // --- API CALL END ---
+
+  // 2. Validate Task (Existing logic)
+  const taskDef = this.commonTasks().find((t: any) => String(t.id) === String(payload.taskId));
+  if (!taskDef) return;
+
+  // 3. Optimistic UI Update (Your existing local update logic)
+  this.raw_data.update(allData => {
+    return allData.map(student => {
+      // Skip students not in the target list
+      if (!targetStudentIdsSet.has(student.id)) return student;
+
+      const existingTaskIndex = student.tasksHistory.findIndex((t: any) => 
+        String(t.assignmentId) === String(payload.taskId)
+      );
+
+      let newHistory = [...student.tasksHistory];
+      const nowIso = new Date().toISOString();
+
+      if (existingTaskIndex > -1) {
+        // SCENARIO 1: Update existing
+        newHistory[existingTaskIndex] = {
+          ...newHistory[existingTaskIndex],
+          isCompleted: payload.isCompleted,
+          completedAt: payload.isCompleted ? nowIso : ''
+        };
+      } else {
+        // SCENARIO 2: Create new (only if checking the box)
+        if (payload.isCompleted) {
+           newHistory.push({
+            recordId: Date.now() + Math.random(), // Temporary ID until reload
+            assignmentId: payload.taskId,
+            taskName: taskDef.name,
+            isCompleted: true,
+            completedAt: nowIso
+          });
+        }
+      }
+
+      return { ...student, tasksHistory: newHistory };
+    });
+  });
+
+  this.closeMassModal();
+}
 }
