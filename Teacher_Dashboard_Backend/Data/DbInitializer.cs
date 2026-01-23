@@ -10,7 +10,41 @@ public static class DbInitializer
         context.Database.EnsureCreated();
 
         // ==========================================
-        // 1. ГРУППЫ (GROUPS)
+        // 1. ПОЛЬЗОВАТЕЛИ (USERS)
+        // ==========================================
+        if (!context.Users.Any())
+        {
+            var users = new User[]
+            {
+                new User 
+                { 
+                    Username = "admin", 
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"), 
+                    Role = "Admin" 
+                },
+                new User 
+                { 
+                    Username = "teacher", 
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("teacher123"), 
+                    Role = "Teacher" 
+                },
+                new User 
+                { 
+                    Username = "demo", 
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("demo123"), 
+                    Role = "Teacher" 
+                }
+            };
+            context.Users.AddRange(users);
+            context.SaveChanges();
+            Console.WriteLine("--> Пользователи созданы:");
+            Console.WriteLine("    admin / admin123 (Администратор)");
+            Console.WriteLine("    teacher / teacher123 (Преподаватель)");
+            Console.WriteLine("    demo / demo123 (Преподаватель)");
+        }
+
+        // ==========================================
+        // 2. ГРУППЫ (GROUPS)
         // ==========================================
         if (!context.Groups.Any())
         {
@@ -26,7 +60,7 @@ public static class DbInitializer
         }
 
         // ==========================================
-        // 2. ЗАДАНИЯ (ASSIGNMENTS)
+        // 3. ЗАДАНИЯ (ASSIGNMENTS)
         // ==========================================
         if (!context.Assignments.Any())
         {
@@ -59,7 +93,7 @@ public static class DbInitializer
         }
 
         // ==========================================
-        // 3. СТУДЕНТЫ (STUDENTS)
+        // 4. СТУДЕНТЫ (STUDENTS)
         // ==========================================
         if (!context.Students.Any())
         {
@@ -96,7 +130,7 @@ public static class DbInitializer
         }
 
         // ==========================================
-        // 4. ИСТОРИЯ (COMPLETED ASSIGNMENTS)
+        // 5. ИСТОРИЯ (COMPLETED ASSIGNMENTS)
         // ==========================================
         if (!context.CompletedAssignments.Any())
         {

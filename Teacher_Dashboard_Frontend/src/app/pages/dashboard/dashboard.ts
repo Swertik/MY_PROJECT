@@ -1,6 +1,8 @@
 import { Component, computed, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { SearchOption, StudentDashboardItem } from '../../models/dashboard.model';
 import { Llmservice } from '../../services/llmservice';
+import { AuthService } from '../../services/auth';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { ModalForm } from "../../modal-forms/modal-form/modal-form";
@@ -28,10 +30,20 @@ export class Dashboard implements OnInit {
   sortCriteria = signal<SortCriteria>('name');
   sortDirection = signal<SortDirection>('asc')
 
-
-  lmmService = inject(Llmservice)
+  lmmService = inject(Llmservice);
+  authService = inject(AuthService);
+  router = inject(Router);
 
   @ViewChild('searchInput') searchInputRef!: ElementRef<HTMLInputElement>;
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  goToAdmin(): void {
+    this.router.navigate(['/admin']);
+  }
 
   @HostListener('window:keydown', ['$event'])
   handleGlobalKeyboardEvent(event: KeyboardEvent) {
@@ -214,7 +226,13 @@ export class Dashboard implements OnInit {
   loadData() {
     this.lmmService.getDashboard().subscribe({
       next: (data) => this.raw_data.set(data),
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error(err);
+        if (err.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      }
     });
   }
 

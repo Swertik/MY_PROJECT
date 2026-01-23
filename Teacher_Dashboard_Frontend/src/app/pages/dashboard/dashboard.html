@@ -1,4 +1,24 @@
 <div class="dashboard-container">
+  <!-- Заголовок с информацией о пользователе и кнопкой выхода -->
+  <div class="dashboard-header">
+    <div class="user-info">
+      <span class="welcome-text">Добро пожаловать, {{ authService.currentUsername() }}!</span>
+      <span class="role-badge" [ngClass]="authService.currentUserRole().toLowerCase()">
+        {{ authService.currentUserRole() === 'Admin' ? 'Администратор' : 'Преподаватель' }}
+      </span>
+    </div>
+    <div class="header-actions">
+      @if (authService.isAdmin()) {
+        <button class="admin-btn" (click)="goToAdmin()">
+          Панель администратора
+        </button>
+      }
+      <button class="logout-btn" (click)="logout()">
+        Выйти
+      </button>
+    </div>
+  </div>
+
   <div class="search-area">
     <div class="chips-input-container">
       @for (chip of searchChips(); track $index) {
