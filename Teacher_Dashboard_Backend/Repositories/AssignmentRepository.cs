@@ -9,6 +9,10 @@ public class AssignmentRepository : IAssignmentRepository
 
     public AssignmentRepository(DatabaseService context)
     {
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
         _context = context;
     }
 

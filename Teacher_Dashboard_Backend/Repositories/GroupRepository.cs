@@ -9,6 +9,10 @@ public class GroupRepository : IGroupRepository
 
     public GroupRepository(DatabaseService context)
     {
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
         _context = context;
     }
 

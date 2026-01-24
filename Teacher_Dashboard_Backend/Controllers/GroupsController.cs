@@ -9,6 +9,10 @@ public class GroupsController : ControllerBase
 
     public GroupsController(IGroupRepository repository)
     {
+        if (repository == null)
+        {
+            throw new ArgumentNullException(nameof(repository));
+        }
         _repository = repository;
     }
 

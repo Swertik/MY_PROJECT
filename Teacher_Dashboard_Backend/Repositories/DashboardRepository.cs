@@ -9,6 +9,10 @@ public class DashboardRepository : IDashboardRepository
 
     public DashboardRepository(DatabaseService context)
     {
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
         _context = context;
     }
 

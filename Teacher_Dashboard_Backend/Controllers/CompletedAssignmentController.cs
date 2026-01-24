@@ -11,6 +11,10 @@ public class CompletedAssignmentController : ControllerBase
 
     public CompletedAssignmentController(ICompletedAssigmentRepository repo)
     {
+        if (repo == null)
+        {
+            throw new ArgumentNullException(nameof(repo));
+        }
         _repo = repo;
     }
 

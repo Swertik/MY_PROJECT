@@ -9,15 +9,31 @@ public class StudentRepository : IStudentRepository
 
     public StudentRepository(DatabaseService context)
     {
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
         _context = context;
     }
 
     public List<Student> GetAll() => _context.Students;
 
-    public Student? GetById(int id) => _context.Students.FirstOrDefault(s => s.Id == id);
+    public Student? GetById(int id)
+    {
+        if (id <= 0)
+        {
+            return null;
+        }
+        return  _context.Students.FirstOrDefault(s => s.Id == id);
+    }
+   
 
     public void Add(Student student)
     {
+        if (student == null)
+        {
+            throw new ArgumentNullException(nameof(student));
+        }
         student.Id = _context.Students.Any() ? _context.Students.Max(s => s.Id) + 1 : 1;
         _context.Students.Add(student);
     }

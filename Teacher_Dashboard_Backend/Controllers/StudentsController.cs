@@ -11,6 +11,10 @@ public class StudentsController : ControllerBase
     // 2. В конструкторе получаем готовый Репозиторий (ASP.NET сам его сюда подставит)
     public StudentsController(IStudentRepository repository)
     {
+        if (repository == null)
+        {
+            throw new ArgumentNullException(nameof(repository));
+        }
         _repository = repository;
     }
 

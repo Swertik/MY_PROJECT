@@ -10,6 +10,10 @@ public class AssignmentsController : ControllerBase
     // Внедряем интерфейс
     public AssignmentsController(IAssignmentRepository repo)
     {
+        if (repo == null)
+        {
+            throw new ArgumentNullException(nameof(repo));
+        }
         _repo = repo;
     }
 

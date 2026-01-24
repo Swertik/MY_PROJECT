@@ -10,6 +10,10 @@ public class CompletedAssignmentRepository : ICompletedAssigmentRepository
 
     public CompletedAssignmentRepository(DatabaseService context)
     {
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
         _context = context;
     }
 
@@ -61,6 +65,10 @@ public class CompletedAssignmentRepository : ICompletedAssigmentRepository
 
     public CompletedAssignment? AddBulk(int[] studentIds, int assignmentId, bool isCompleted)
     {
+        if (studentIds == null || studentIds.Length == 0)
+        {
+            return null;
+        }
         CompletedAssignment? lastRecord = null;
         foreach (var studentId in studentIds)
         {
