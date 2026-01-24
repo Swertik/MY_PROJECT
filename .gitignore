@@ -33,3 +33,7 @@ yarn-error.log
 /.angular/
 .DS_Store
 thumbs.db
+
+# Backend
+/Teacher_Dashboard_Backend/obj
+/Teacher_Dashboard_Backend/bin
