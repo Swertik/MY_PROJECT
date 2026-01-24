@@ -6,12 +6,6 @@
 /out-tsc
 /bazel-out
 
-# Node
-/Teacher_Dashboard_Frontend
-/node_modules
-npm-debug.log
-yarn-error.log
-
 # IDEs and editors
 .idea/
 .project
@@ -35,5 +29,8 @@ yarn-error.log
 thumbs.db
 
 # Backend
-/Teacher_Dashboard_Backend/obj
-/Teacher_Dashboard_Backend/bin
+# C# ignores
+bin/
+obj/
+.vs/
+*.user
